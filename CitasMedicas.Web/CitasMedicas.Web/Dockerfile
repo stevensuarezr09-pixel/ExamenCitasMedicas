@@ -1,15 +1,13 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# 1. Copiamos todo el contenido
+# 1. Subimos dos niveles para copiar TODO el repositorio (Web y API)
 COPY . .
 
-# 2. TRUCO FINAL: Movemos la API a donde la Web la busca
-# Esto soluciona el error "../../API_CitasMedicas" de una vez por todas
-RUN mkdir -p /API_CitasMedicas && cp -r API_CitasMedicas/* /API_CitasMedicas/
-
-# 3. Restauramos y Publicamos
+# 2. Restauramos apuntando al archivo que está en la misma carpeta
 RUN dotnet restore "CitasMedicas.Web/CitasMedicas.Web/CitasMedicas.Web.csproj"
+
+# 3. Publicamos
 RUN dotnet publish "CitasMedicas.Web/CitasMedicas.Web/CitasMedicas.Web.csproj" -c Release -o /app/publish
 
 # 4. Imagen final

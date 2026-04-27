@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="API_CitasMedicas/API_CitasMedicas.csproj" />
+  <Project Path="CitasMedicas.Web/CitasMedicas.Web.csproj" Id="5dfca9c9-f197-437a-948e-facff48739cb" />
+</Solution>

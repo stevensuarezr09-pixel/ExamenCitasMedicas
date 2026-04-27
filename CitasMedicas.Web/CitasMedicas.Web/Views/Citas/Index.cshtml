@@ -1,0 +1,39 @@
+﻿@model List<API_CitasMedicas.Models.Cita>
+
+<div class="container mt-4">
+    <h2>Listado de Citas Programadas</h2>
+    <hr />
+    <div class="mb-3">
+        <a asp-action="Create" class="btn btn-primary shadow-sm">
+            <span>📅</span> Agendar Nueva Cita
+        </a>
+    </div>
+    <table class="table table-success table-striped">
+        <thead>
+            <tr>
+                <th>Fecha y Hora</th>
+                <th>Médico</th>
+                <th>Paciente</th>
+                <th>Motivo</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cita in Model)
+            {
+                <tr>
+                    <td>@cita.FechaHora</td>
+                    <td>@(cita.Medico?.Nombre ?? "N/A")</td>
+                    <td>@(cita.Paciente?.Nombre ?? "N/A")</td>
+                    <td>@cita.Motivo</td>
+                    <td>
+                        <div class="btn-group">
+                            <a asp-action="Edit" asp-route-id="@cita.Id" class="btn btn-sm btn-outline-primary">Reagendar</a>
+                            <a asp-action="Delete" asp-route-id="@cita.Id" class="btn btn-sm btn-outline-danger">Cancelar</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

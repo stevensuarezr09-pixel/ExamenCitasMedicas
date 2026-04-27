@@ -1,18 +1,17 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# 1. Copiamos todo el contenido del repositorio
+# 1. Copiamos TODO el repositorio (API y Web)
 COPY . .
 
-# 2. Restauramos las dependencias
-# Usamos el comando exacto para que encuentre ambos proyectos en tus carpetas de GitHub
-RUN dotnet restore "CitasMedicas.Web/CitasMedicas.Web/CitasMedicas.Web.csproj"
+# 2. Comando especial para arreglar las referencias de carpetas
+# Esto hace que la Web encuentre a la API sin importar los "../../"
+RUN dotnet restore $(find . -name "CitasMedicas.Web.csproj")
 
 # 3. Publicamos la Web
-# Al estar en /src, el compilador verá la carpeta /src/API_CitasMedicas y resolverá la referencia
-RUN dotnet publish "CitasMedicas.Web/CitasMedicas.Web/CitasMedicas.Web.csproj" -c Release -o /app/publish
+RUN dotnet publish $(find . -name "CitasMedicas.Web.csproj") -c Release -o /app/publish
 
-# 4. Imagen final de ejecución
+# 4. Imagen final
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/publish .

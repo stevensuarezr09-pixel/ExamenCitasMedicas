@@ -1,20 +1,19 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# 1. Copiamos TODA la solución para que se encuentren las referencias entre proyectos
+# 1. Copiamos ABSOLUTAMENTE TODO el repositorio
 COPY . .
 
-# 2. Restauramos las dependencias de la Web
-RUN dotnet restore "CitasMedicas.Web/CitasMedicas.Web/CitasMedicas.Web.csproj"
+# 2. Restauramos usando una búsqueda automática para no fallar con las rutas
+RUN dotnet restore $(find . -name "CitasMedicas.Web.csproj")
 
-# 3. Compilamos y Publicamos
-# El comando ahora se asegura de compilar la Web sabiendo que la API existe al lado
-RUN dotnet publish "CitasMedicas.Web/CitasMedicas.Web/CitasMedicas.Web.csproj" -c Release -o /app/publish
+# 3. Compilamos y Publicamos la Web
+RUN dotnet publish $(find . -name "CitasMedicas.Web.csproj") -c Release -o /app/publish
 
 # 4. Imagen final de ejecución
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/publish .
 
-# Asegúrate de que el nombre de la DLL sea el correcto
+# Asegúrate que el nombre de la DLL coincida con tu proyecto
 ENTRYPOINT ["dotnet", "CitasMedicas.Web.dll"]

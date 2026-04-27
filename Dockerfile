@@ -1,19 +1,19 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
-# 1. Copiamos todo el contenido
+# Copiamos todo el contenido del repo
 COPY . .
 
-# 2. Restauramos apuntando DIRECTAMENTE al proyecto (csproj), saltándonos el .slnx
-RUN dotnet restore API_CitasMedicas/API_CitasMedicas.csproj
+# Buscamos el archivo .csproj automáticamente y restauramos
+RUN dotnet restore $(find . -name "*.csproj" | head -n 1)
 
-# 3. Publicamos el proyecto
-RUN dotnet publish API_CitasMedicas/API_CitasMedicas.csproj -c Release -o out
+# Publicamos el proyecto buscando el archivo .csproj automáticamente
+RUN dotnet publish $(find . -name "*.csproj" | head -n 1) -c Release -o out
 
-# 4. Imagen de ejecución
+# Imagen de ejecución
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/out .
 
-# 5. Arrancamos la DLL
+# Ejecutamos la DLL (el nombre de tu proyecto)
 ENTRYPOINT ["dotnet", "API_CitasMedicas.dll"]

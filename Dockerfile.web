@@ -1,15 +1,17 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
-# Copiamos todo
+# 1. Copiamos todo el contenido del repo
 COPY . .
 
-# Publicamos específicamente la Web
-RUN dotnet publish "CitasMedicas.Web/CitasMedicas.Web.csproj" -c Release -o out
+# 2. Buscamos y publicamos el proyecto de la Web automáticamente
+# Esto soluciona el error de "Project file does not exist"
+RUN dotnet publish $(find . -name "CitasMedicas.Web.csproj") -c Release -o out
 
+# 3. Imagen de ejecución
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/out .
 
-# Asegúrate de que el nombre de la DLL sea el correcto
+# 4. Comando de inicio (Asegúrate que el nombre de la DLL sea este)
 ENTRYPOINT ["dotnet", "CitasMedicas.Web.dll"]

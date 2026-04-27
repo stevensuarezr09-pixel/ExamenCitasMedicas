@@ -1,19 +1,20 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
-# Copiamos todo el contenido del repo
+# 1. Copiamos todo
 COPY . .
 
-# Buscamos el archivo .csproj automáticamente y restauramos
+# 2. Restauramos dependencias
 RUN dotnet restore $(find . -name "*.csproj" | head -n 1)
 
-# Publicamos el proyecto buscando el archivo .csproj automáticamente
-RUN dotnet publish $(find . -name "*.csproj" | head -n 1) -c Release -o out
+# 3. PUBLICAR (AQUÍ ESTÁ EL TRUCO): 
+# Agregamos un comando para que no falle si falta la base de datos .mdf
+RUN dotnet publish $(find . -name "*.csproj" | head -n 1) -c Release -o out /p:PublishMetadata=false /p:CopyAllFilesToSingleFolderForMsdeploy=false
 
-# Imagen de ejecución
+# 4. Imagen de ejecución
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/out .
 
-# Ejecutamos la DLL (el nombre de tu proyecto)
+# 5. Arrancamos
 ENTRYPOINT ["dotnet", "API_CitasMedicas.dll"]

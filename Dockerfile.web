@@ -1,19 +1,21 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# 1. Copiamos TODO el repositorio (API y Web)
+# 1. Copiamos TODO el repositorio
 COPY . .
 
-# 2. Comando especial para arreglar las referencias de carpetas
-# Esto hace que la Web encuentre a la API sin importar los "../../"
-RUN dotnet restore $(find . -name "CitasMedicas.Web.csproj")
+# 2. TRUCO MAESTRO: Corregimos la ruta de la referencia en el archivo .csproj
+# Esto cambia el "../../" por la ruta real dentro de Docker
+RUN find . -name "*.csproj" -exec sed -i 's|..\/..\/API_CitasMedicas|..\/API_CitasMedicas|g' {} +
 
-# 3. Publicamos la Web
+# 3. Restauramos y Publicamos usando búsquedas automáticas
+RUN dotnet restore $(find . -name "CitasMedicas.Web.csproj")
 RUN dotnet publish $(find . -name "CitasMedicas.Web.csproj") -c Release -o /app/publish
 
-# 4. Imagen final
+# 4. Imagen final de ejecución
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/publish .
 
+# Asegúrate que el nombre de la DLL sea este
 ENTRYPOINT ["dotnet", "CitasMedicas.Web.dll"]

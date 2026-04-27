@@ -4,14 +4,15 @@ WORKDIR /app
 # 1. Copiamos todo el contenido
 COPY . .
 
-# 2. TRUCO DEFINITIVO: Eliminamos la referencia al archivo .mdf del archivo de proyecto
-# Esto quita la "obligación" de copiar ese archivo inexistente.
-RUN sed -i '/ClinicaMedica.mdf/d' $(find . -name "*.csproj" | head -n 1)
+# 2. LIMPIEZA AGRESIVA: Borramos cualquier referencia a archivos .mdf o .ldf
+# Usamos un comando que limpia el archivo .csproj sin importar cómo esté escrita la ruta
+RUN find . -name "*.csproj" -exec sed -i '/.mdf/d' {} +
+RUN find . -name "*.csproj" -exec sed -i '/.ldf/d' {} +
 
 # 3. Restauramos dependencias
 RUN dotnet restore $(find . -name "*.csproj" | head -n 1)
 
-# 4. Publicamos el proyecto (sin archivos que sobren)
+# 4. Publicamos el proyecto
 RUN dotnet publish $(find . -name "*.csproj" | head -n 1) -c Release -o out
 
 # 5. Imagen de ejecución final

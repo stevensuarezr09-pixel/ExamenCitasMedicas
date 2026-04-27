@@ -4,12 +4,12 @@ WORKDIR /src
 # 1. Copiamos todo el contenido del repositorio
 COPY . .
 
-# 2. Restauramos las dependencias buscando los proyectos manualmente
-# Esto evita el error del archivo .slnx
+# 2. Restauramos las dependencias
+# Usamos el comando exacto para que encuentre ambos proyectos en tus carpetas de GitHub
 RUN dotnet restore "CitasMedicas.Web/CitasMedicas.Web/CitasMedicas.Web.csproj"
 
 # 3. Publicamos la Web
-# El compilador encontrará la API porque está en la carpeta de al lado (/src/API_CitasMedicas)
+# Al estar en /src, el compilador verá la carpeta /src/API_CitasMedicas y resolverá la referencia
 RUN dotnet publish "CitasMedicas.Web/CitasMedicas.Web/CitasMedicas.Web.csproj" -c Release -o /app/publish
 
 # 4. Imagen final de ejecución
@@ -17,5 +17,4 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/publish .
 
-# Asegúrate de que el nombre de la DLL sea este
 ENTRYPOINT ["dotnet", "CitasMedicas.Web.dll"]

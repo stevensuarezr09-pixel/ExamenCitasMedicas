@@ -1,0 +1,18 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# 1. Copiamos TODO el repositorio (esto incluye API y Web)
+COPY . .
+
+# 2. Restauramos usando la ruta completa desde la raíz
+RUN dotnet restore "CitasMedicas.Web/CitasMedicas.Web/CitasMedicas.Web.csproj"
+
+# 3. Publicamos la Web
+RUN dotnet publish "CitasMedicas.Web/CitasMedicas.Web/CitasMedicas.Web.csproj" -c Release -o /app/publish
+
+# 4. Imagen final
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+COPY --from=build /app/publish .
+
+ENTRYPOINT ["dotnet", "CitasMedicas.Web.dll"]

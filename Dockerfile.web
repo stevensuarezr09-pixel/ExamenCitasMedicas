@@ -1,19 +1,21 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# 1. Copiamos TODO el repositorio para que las referencias entre proyectos funcionen
+# 1. Copiamos todo el contenido del repositorio
 COPY . .
 
-# 2. Forzamos la restauración de toda la solución para que se vinculen los proyectos
-RUN dotnet restore "API_CitasMedicas.slnx" || dotnet restore
+# 2. Restauramos las dependencias buscando los proyectos manualmente
+# Esto evita el error del archivo .slnx
+RUN dotnet restore "CitasMedicas.Web/CitasMedicas.Web/CitasMedicas.Web.csproj"
 
-# 3. Publicamos la Web buscando el archivo .csproj automáticamente
-RUN dotnet publish $(find . -name "CitasMedicas.Web.csproj") -c Release -o /app/publish
+# 3. Publicamos la Web
+# El compilador encontrará la API porque está en la carpeta de al lado (/src/API_CitasMedicas)
+RUN dotnet publish "CitasMedicas.Web/CitasMedicas.Web/CitasMedicas.Web.csproj" -c Release -o /app/publish
 
 # 4. Imagen final de ejecución
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/publish .
 
-# Asegúrate de que el nombre de la DLL coincida con el nombre de salida de tu proyecto
+# Asegúrate de que el nombre de la DLL sea este
 ENTRYPOINT ["dotnet", "CitasMedicas.Web.dll"]

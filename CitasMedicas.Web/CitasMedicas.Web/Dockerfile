@@ -1,21 +1,19 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /app
+WORKDIR /src
 
-# 1. Copiamos TODO el contenido del repositorio (todas las carpetas)
-# Al dejar el Root Directory vacío en Render, este punto "." es la raíz del repo
+# 1. Copiamos TODO el repositorio a la carpeta /src
 COPY . .
 
-# 2. Restauramos las dependencias
-RUN dotnet restore "CitasMedicas.Web/CitasMedicas.Web/CitasMedicas.Web.csproj"
+# 2. Forzamos la restauración del proyecto Web buscando el archivo donde sea que esté
+RUN dotnet restore $(find . -name "CitasMedicas.Web.csproj")
 
-# 3. Publicamos el proyecto de la Web
-# Ahora sí encontrará la carpeta de la API porque estamos compilando desde la raíz
-RUN dotnet publish "CitasMedicas.Web/CitasMedicas.Web/CitasMedicas.Web.csproj" -c Release -o out
+# 3. Publicamos el proyecto Web. 
+# Al estar en /src (la raíz), el compilador encontrará la carpeta API_CitasMedicas sin problemas.
+RUN dotnet publish $(find . -name "CitasMedicas.Web.csproj") -c Release -o /app/publish
 
-# 4. Imagen de ejecución
+# 4. Imagen final de ejecución
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-COPY --from=build /app/out .
+COPY --from=build /app/publish .
 
-# 5. Punto de entrada
 ENTRYPOINT ["dotnet", "CitasMedicas.Web.dll"]

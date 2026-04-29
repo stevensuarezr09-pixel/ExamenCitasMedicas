@@ -1,17 +1,16 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /app
+WORKDIR /src
 
-# 1. Copiamos todo lo que hay en la carpeta actual
+# 1. Copiamos TODO el repositorio para estar seguros
 COPY . .
 
-# 2. Publicamos buscando el archivo .csproj donde sea que esté en esta carpeta
-RUN dotnet publish *.csproj -c Release -o out
+# 2. Forzamos la búsqueda del proyecto en cualquier carpeta
+# Esto evita el error de "Project file does not exist"
+RUN dotnet publish $(find . -name "CitasMedicas.Web.csproj") -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
+COPY --from=build /app/publish .
 
-# 3. Traemos los archivos publicados
-COPY --from=build /app/out .
-
-# 4. Ejecutamos la DLL (asegúrate de que el nombre sea este)
+# El nombre de la DLL (basado en tus capturas anteriores)
 ENTRYPOINT ["dotnet", "CitasMedicas.Web.dll"]

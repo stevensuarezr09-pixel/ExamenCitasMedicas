@@ -1,16 +1,16 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# Nos paramos en la raíz del contenedor
 WORKDIR /src
 
-# 1. Copiamos TODO el repositorio para estar seguros
+# Copiamos TODO lo que hay en la carpeta donde está el Dockerfile
 COPY . .
 
-# 2. Forzamos la búsqueda del proyecto en cualquier carpeta
-# Esto evita el error de "Project file does not exist"
-RUN dotnet publish $(find . -name "CitasMedicas.Web.csproj") -c Release -o /app/publish
+# Comando de publicación usando el nombre exacto que veo en tus capturas
+RUN dotnet publish "CitasMedicas.Web.csproj" -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/publish .
 
-# El nombre de la DLL (basado en tus capturas anteriores)
+# Asegúrate de que el nombre sea exacto
 ENTRYPOINT ["dotnet", "CitasMedicas.Web.dll"]
